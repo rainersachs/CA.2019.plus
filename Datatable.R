@@ -1,6 +1,3 @@
-# Comments on purpose, authors, license GPL3, GitHub, etc. to appear here
-# This suite can be freely downloaded from GitHub repository rainersachs/foo.
-# It can be freely modified and run under the (lenient) GPL_v3 provisions
 library(deSolve) # package for solving differential equations.
 library(minpack.lm) # package for non-linear regression #rks to laz: I think we probably can just use nls() in stats, not nlsLM from linpack. Please check in R documentation if there is any functional difference at all
 library(mvtnorm) # package for calculating confidence intervals by Monte Carlo simulation based on variance-covariance matrices #rks to laz: I added to comment.Please check that my addition is OK.
@@ -9,20 +6,19 @@ library(dplyr)
 rm(list=ls())
 #Create dataframes that store the fibroblast WGE simple CA data used in 16Cacao 
 
-# Some GCR components are high-speed Oxygen nuclei (Z=8) that are almost fully ionized.
-# Similarly for other GCR components; d=dose; Z is charge #; CA are per hundred cells.
-# The data frame incorporates a correction to Fe600 at dose 0.06
+# Some GCR components are high-speed Oxygen nuclei that are almost fully ionized. d=dose; CA are per hundred cells.
+#putting it in one big data frame. #rks: the data frame incorporates a correction to Fe600 at dose 0.06, near line 34
 
-main_df = read.csv(file="master_1_ion_data.csv")
+main_df = read.csv(file = 'CSV Late July.csv')
 main_df = main_df %>% mutate(label = MeH_.) %>% select(-MeH_.)
 #Comments:
-# comment = c(
-#   "There are some LET discrepancies.",
-#   "For now, we changed the LET measurements for two rows: Row28 from 17 to 20.93, Row91 from 190 to 175",
-#   "For now, we changed one Z.b value 2 from 504.9148 to 504.918"
-# )
-# 
-# 
+comment = c(
+  "There are some LET discrepancies. We decided to use the values given by Hada in all cases",
+  "For now, we changed the LET measurements for two rows: Row28 from 17 to 20.93, Row91 from 190 to 175",
+  "For now, we changed the Z.b value for row42 from 504.9148 to 504.918"
+)
+
+
 # #Column Descriptions
 # KE_label = "Specific kinetic energy (SKE in MeV/u)"
 # CA_label = "WGE apparently simple aberrations"
@@ -80,7 +76,3 @@ risk = sum(dose0$At.Risk)
 p = num/risk
 BG_CA = p
 BG_error = sqrt((p*(1-p))/risk)
-
-
-SwiftLight_data <- filter(main_df, Z <= 2 & d>0)
-HZE_data = main_df %>% filter(Z > 3 & d > 0)
