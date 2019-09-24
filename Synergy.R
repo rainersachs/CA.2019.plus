@@ -81,6 +81,9 @@ result = calibration_HZE("NEW1", StartValues = list(kap0 = 600, sig0 = 5, eta0 =
 parameters_NEW1 = result[[1]]
 sig_NEW1= result[[2]]
 model_NEW1 = result[[3]]
+summary(model_NEW1, correlation = T)
+vcov(model_NEW1) #This is the same as sig_NEW1
+
 #Calibration for NEW2 model
 result = calibration_HZE("NEW2", StartValues = list(kap0 = 2000, sig0 = 5, eta0=.05))
 parameters_NEW2 = result[[1]]
