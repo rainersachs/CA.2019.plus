@@ -229,38 +229,6 @@ para_4para_var =  c(eta0 = list(MC_4para_var_samples[,"eta0"]),
 MC_4para_cov = make_datapara(para_4para_cov, model = "4para", n = N)
 MC_4para_var = make_datapara(para_4para_var, model = "4para", n = N)
 
-#3-Parameter Model Monte Carlo Sampling
-
-MC_3para_cov_samples = sample_parameters(model = "3para", n = N, cov = T)
-para_3para_cov =  c(eta0 = list(MC_3para_cov_samples[,"eta0"]), 
-                    eta1 = list(MC_3para_cov_samples[,"eta1"]),
-                    sig0 = list(MC_3para_cov_samples[,"sig0"]),
-                    a = list(MC_3para_cov_samples[,"a"]))
-
-MC_3para_var_samples = sample_parameters(model = "3para", n = N, cov = F)
-para_3para_var =  c(eta0 = list(MC_3para_var_samples[,"eta0"]), 
-                    eta1 = list(MC_3para_var_samples[,"eta1"]),
-                    sig0 = list(MC_3para_var_samples[,"sig0"]),
-                    a = list(MC_3para_cov_samples[,"a"]))
-
-MC_3para_cov = make_datapara(para_3para_cov, model = "3para",n = N)
-MC_3para_var = make_datapara(para_3para_var, model = "3para",n = N)
-
-#2-Parameter Model Monte Carlo Sampling
-
-MC_2para_cov_samples = sample_parameters(model = "2para", n = N, cov = T)
-para_2para_cov =  c(eta0 = list(MC_2para_cov_samples[,"eta0"]), 
-                    sig0 = list(MC_2para_cov_samples[,"sig0"]),
-                    a = list(MC_2para_cov_samples[,"a"]))
-
-MC_2para_var_samples = sample_parameters(model = "2para", n = N, cov = F)
-para_2para_var =  c(eta0 = list(MC_2para_var_samples[,"eta0"]), 
-                    sig0 = list(MC_2para_var_samples[,"sig0"]),
-                    a = list(MC_2para_cov_samples[,"a"]))
-
-MC_2para_cov = make_datapara(para_2para_cov, model = "2para",n = N)
-MC_2para_var = make_datapara(para_2para_var, model = "2para",n = N)
-
 #2-Parameter TE Model Monte Carlo Sampling
 
 MC_2paraTE_cov_samples = sample_parameters(model = "2paraTE", n = N, cov = T)
@@ -314,8 +282,6 @@ MC_NEW2_var = make_datapara(para_NEW2_var, model = "NEW2",n = N)
 
 
 #Combining them into lists for monte_carlo function
-MC_2para = list(MC_2para_cov, MC_2para_var, name = "2para")
-MC_3para = list(MC_3para_cov, MC_3para_var, name = "3para")
 MC_4para = list(MC_4para_cov, MC_4para_var, name = "4para")
 MC_2paraTE =  list(MC_2paraTE_cov, MC_2paraTE_var, name = "2paraTE")
 MC_NEW2 = list(MC_NEW2_cov, MC_NEW2_var, name = "NEW2")

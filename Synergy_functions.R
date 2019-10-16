@@ -8,8 +8,9 @@ start_values = list(
   a = -0.5, b = -10, C = -1
 )
 
-calibration_HZE = function(model_name, data = HZE_data, StartValues = start_values, return_model = F){
-  #A function that returns the calibrated model for HZE and only takes in a model name (as string)
+calibration = function(model_name, data = HZE_data, StartValues = start_values, return_model = F){
+  #A function that returns the calibrated model and only takes in a model name (as string)
+  #For HZE, make sure data is set to HZE_date. For SLI, make sure data is set to SwiftLight_data
   #StartValues is a list with starting guesses assigned to each parameter.
   
   func_name = paste("func_", model_name, sep ="") #This is the name of the function corresponding to the model
@@ -31,36 +32,22 @@ calibration_HZE = function(model_name, data = HZE_data, StartValues = start_valu
   }
 }
 
-calibration_SLI = function(model_type, npara, data = SwiftLight_data, return_model = F){
-  if (grepl("linear", tolower(model_type))){ #If this is a linear model, then we do not need to use nls anymore.
-    if (npara == 1){
-      model = lm(I(CA - BG_CA) ~ 0 + d, data = data, weights = 1/error^2)
-    }
-    else if (npara == 2){
-      model = lm(I(CA - BG_CA) ~ d, data = data, weights = 1/error^2)
-    }
-  }
-  else if (grepl("exp", tolower(model_type))){
-    
-  }
-}
-
 #================================ MODEL COMPARISON ==================================#
 
-AIC_function = function(model_name) {
-  model = calibration_HZE(model_name = model_name, return_model = T)
+AIC_function = function(model_name, data = HZE_data) {
+  model = calibration(model_name = model_name, data = data, return_model = T)
   RS = resid(model)**2 %>% as.numeric()
   n = length(RS)
   k = model %>% coef %>% length
-  WRSS = sum((1/HZE_data$error^2)*RS)
+  WRSS = sum((1/data$error^2)*RS)
   return(n + n*log(2*pi) + n*log(WRSS/n) + 2*(k+1))
 }
-BIC_function = function(model_name) {
-  model = calibration_HZE(model_name = model_name, return_model = T)
+BIC_function = function(model_name, data = HZE_data) {
+  model = calibration(model_name = model_name, data = data, return_model = T)
   RS = resid(model)**2 %>% as.numeric()
   n = length(RS)
   k = model %>% coef %>% length
-  WRSS = sum((1/HZE_data$error^2)*RS)
+  WRSS = sum((1/data$error^2)*RS)
   return(n + n*log(2*pi) + n*log(WRSS/n) + log(n)*(k+1))
 }
 
@@ -82,7 +69,7 @@ CV_function = function(model_name, data = HZE_data, by = "label", by_fold = F){
     train = data[-train_index,]
     test = data[train_index,]
     n[i] = nrow(test)
-    model = calibration_HZE(model_name, data = train, return_model = T)
+    model = calibration(model_name, data = train, return_model = T)
     prediction = predict(model, test)
     RS = (test$CA - prediction)**2
     WMSE[i] = mean((1/test$error^2)*RS)

@@ -20,7 +20,7 @@ MIXDER_NEW2_var_mix9 = MC_results_NEW2_var_mix9[[1]]
 
 #================================ Mixture Plot ==================================#
 
-#mixture 9,10,11
+#mixture 9,10,11 NTE model
 MIXDER_df = MIXDER_NEW1_cov_mix9 #The main data set we are using is the var-cov version, and the variance only version is only used as a superposed ribbon
 colnames(MIXDER_df)[2] = "mixDER"
 DER_df = main_df %>% filter(ion %in% c("H250", "He250", "O350", "Si260", "Ti1000", "Fe600")) #For individual rows (data points)
@@ -39,15 +39,15 @@ p_mix = ggplot(data = MIXDER_df, aes(x = d * 100)) + #This example consists a mi
   #The following two lines are ribbons. To make the grabbing easier in Illustrator, it is best to have a plot without the ribbon and a plot with.
   #geom_ribbon(data = MIXDER_NEW1_var_mix9, aes(ymin = 100 * CI_lower, ymax = 100 * CI_upper), fill = "steelblue", alpha = 0.3) +
   #geom_ribbon(aes(ymin = 100 * CI_lower, ymax = 100 * CI_upper), fill = "red", alpha = 0.3) + #MonteCarlo Ribbons (red ribbons)
-  geom_point(data = DER_df, aes(x= 100*d, y = 100*CA, color = ion, size = 1/sqrt(error))) + #Data Points, all solid colors now, no more transparency.
+  geom_point(data = DER_df, aes(x= 100*d, y = 100*CA, color = ion, size = 1/sqrt(error), shape = "1-ion")) + #Data Points, all solid colors now, no more transparency.
   geom_line(aes(y = 100*mixDER, linetype = "IEA (mixDER)"), size = 1.2) + #MIXDER (black solid line)
   geom_line(aes(y = 100*simpleeffect, linetype = "SEA"), size = 1.2) + #Simple Effect Additivity (black dashed line)
-  scale_size_continuous("Accuracy",range = c(1.5,4)) +
-  geom_point(aes(x = 100, y = 3.3851276), size = 4) + geom_errorbar(aes(x = 100, ymin = 3.3851276-0.4260221, ymax = 3.3851276 + 0.4260221), size = 1) +
-  geom_point(aes(x = 50, y = 1.5483182), size = 4) + geom_errorbar(aes(x = 50, ymin = 1.5483182-0.285281, ymax = 1.5483182 + 0.285281), size = 1) +
-  geom_point(aes(x = 25, y = 1.2321341), size = 4) + geom_errorbar(aes(x = 25, ymin = 1.2321341-0.244904, ymax = 1.2321341 + 0.244904), size = 1) +
-  
+  scale_size_continuous("Accuracy",range = c(1.5, 4)) +
+  geom_point(aes(x = 100, y = 3.3851276, shape = "Mixture"), size = 4) + geom_errorbar(aes(x = 100, ymin = 3.3851276-0.4260221, ymax = 3.3851276 + 0.4260221), size = 1) +
+  geom_point(aes(x = 50, y = 1.5483182, shape = "Mixture"), size = 4) + geom_errorbar(aes(x = 50, ymin = 1.5483182-0.285281, ymax = 1.5483182 + 0.285281), size = 1) +
+  geom_point(aes(x = 25, y = 1.2321341, shape = "Mixture"), size = 4) + geom_errorbar(aes(x = 25, ymin = 1.2321341-0.244904, ymax = 1.2321341 + 0.244904), size = 1) +
   scale_color_manual("Ions", breaks = c("H250", "He228", "O350", "Si260", "Ti1000", "Fe600"), values=c("blue3", "red", "purple", "darkgreen", "cyan", "orange", "steelblue")) + #legend for Ions
+  scale_shape_manual("Data Type", breaks = c("1-ion", "Mixture"), values = c(16, 17)) +
   guides(alpha=FALSE) +
   theme(panel.background = element_rect(fill = "white", colour = "grey50"),  #Some random tweeks of the ggplot theme. Need someone more artistic to do this part :)
         panel.grid.major.y = element_line(colour = "grey80"),
@@ -59,10 +59,10 @@ p_mix = ggplot(data = MIXDER_df, aes(x = d * 100)) + #This example consists a mi
         legend.title = element_text(size = 12, face = "bold")
   ) +
   
-  labs(x = "Dosage (cGy)", y = "Chromosomal Aberrations (%)", title = "IDER and MixDER for H250 + He228 + O350 + Si260 + Ti1000 + Fe600", subtitle = "Model = NEW NTE, r = (0.6, 0.2, 0.1, 0.025, 0.025, 0.05)") #axis labels and plot title
+  labs(x = "Dosage (cGy)", y = "Chromosomal Aberrations (%)", linetype = "Effect Additivity", title = "IDER and MixDER for H250 + He228 + O350 + Si260 + Ti1000 + Fe600", subtitle = "Model = NEW NTE, r = (0.6, 0.2, 0.1, 0.025, 0.025, 0.05)") #axis labels and plot title
 
 p_mix
-ggsave("mix91011_NEWNTE_var.eps", device = cairo_ps, width = 20, height = 14) #This line outputs the EPS file. After testing, what seemed to help was to increase the resolution by increasing width and height (these are in inches). Do not make them too big. It will crash the computer.
+ggsave("mix91011_NEWNTE.eps", device = cairo_ps, width = 20, height = 14) #This line outputs the EPS file. After testing, what seemed to help was to increase the resolution by increasing width and height (these are in inches). Do not make them too big. It will crash the computer.
 
 #Mixture Example 2: 
 #Here is an example with ribbons, with 1-ion DERs, with error bars on individual data points except the mixture data.
@@ -74,9 +74,9 @@ p_mix = ggplot(data = MIXDER_df, aes(x = d * 100)) + #This example consists a mi
   geom_line(aes(y = 100 * Ti1000, color = "Ti1000"), linetype = "dashed", size = 1) +
   geom_line(aes(y = 100 * Fe600, color = "Fe600"), linetype = "dashed", size = 1) +
   #The following two lines are ribbons. To make the grabbing easier in Illustrator, it is best to have a plot without the ribbon and a plot with.
-  geom_ribbon(data = MIXDER_NEW1_var_mix9, aes(ymin = 100 * CI_lower, ymax = 100 * CI_upper), fill = "steelblue", alpha = 0.3) +
-  geom_ribbon(aes(ymin = 100 * CI_lower, ymax = 100 * CI_upper), fill = "red", alpha = 0.3) + #MonteCarlo Ribbons (red ribbons)
-  geom_point(data = DER_df, aes(x= 100*d, y = 100*CA, color = ion, size = 1/sqrt(error))) + geom_errorbar(data = DER_df, aes(x = 100*d, ymin = 100*(CA - error), ymax = 100*(CA + error)), size = 0.4, width = 1.2) +#Data Points, all solid colors now, no more transparency.
+  #geom_ribbon(data = MIXDER_NEW1_var_mix9, aes(ymin = 100 * CI_lower, ymax = 100 * CI_upper), fill = "steelblue", alpha = 0.3) +
+  geom_ribbon(aes(ymin = 100 * CI_lower, ymax = 100 * CI_upper), fill = "gold1", alpha = 0.5) + #MonteCarlo Ribbons (red ribbons)
+  geom_point(data = DER_df, aes(x= 100*d, y = 100*CA, color = ion, size = 1/sqrt(error))) + geom_errorbar(data = DER_df, aes(x = 100*d, ymin = 100*(CA - error), ymax = 100*(CA + error), width = error * 100), size = 0.4) +#Data Points, all solid colors now, no more transparency.
   geom_line(aes(y = 100*mixDER, linetype = "IEA (mixDER)"), size = 1.2) + #MIXDER (black solid line)
   geom_line(aes(y = 100*simpleeffect, linetype = "SEA"), size = 1.2) + #Simple Effect Additivity (black dashed line)
   scale_size_continuous("Accuracy",range = c(2,4)) +
@@ -96,10 +96,12 @@ p_mix = ggplot(data = MIXDER_df, aes(x = d * 100)) + #This example consists a mi
         legend.title = element_text(size = 12, face = "bold")
   ) +
   
-  labs(x = "Dosage (cGy)", y = "Chromosomal Aberrations (%)", title = "IDER and MixDER for H250 + He228 + O350 + Si260 + Ti1000 + Fe600", subtitle = "Model = NEW NTE, r = (0.6, 0.2, 0.1, 0.025, 0.025, 0.05)") #axis labels and plot title
+  labs(x = "Dosage (cGy)", y = "Chromosomal Aberrations (%)", linetype = "Effect Additivity", title = "IDER and MixDER for H250 + He228 + O350 + Si260 + Ti1000 + Fe600", subtitle = "Model = NEW NTE, r = (0.6, 0.2, 0.1, 0.025, 0.025, 0.05)") #axis labels and plot title
 
 p_mix
-ggsave("mix91011_NEWNTE_var.eps", device = cairo_ps, width = 20, height = 14)
+ggsave("mix91011_NEWNTE_noribbon.png", width = 20, height = 14)
+
+ggsave("mix91011_NEWNTE_noribbon.eps", device = cairo_ps, width = 20, height = 14)
 
 #================================ One Ion IDER Plots ==================================#
 #Here it is done with a function instead of raw code. 

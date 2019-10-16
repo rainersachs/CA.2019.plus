@@ -57,27 +57,33 @@ func_2paraTE = function(d, L, Z.b, kap0, sig0){
   return(BG_CA + (sigma*6.24*(d/L))*(1 - exp(-1024*(d/L))))
 }
 
-#Swift Light Ion 2 parameter 
+#Swift Light Ion 2 parameter exponential
 func_sli_exp2 <- function(a, C, d) {
-  return(BG_CA + C*(exp(a*d)-1))
+  return(BG_CA + C*(exp(a*d)))
 }
 
-#Swift Light Ion 3 paramter 
+#Swift Light Ion 3 paramter exponential
 func_sli_exp3 <- function(a, b, C, d) {
-  return(BG_CA + C*(exp(a*d+b*d^2)-1))
+  return(BG_CA + C*(exp(a*d+b*d^2)))
 }
 
+#Swift Light Ion 1 parameter linear
 func_sli_lin1 <- function(d, a){
   return(BG_CA + a*d)
 }
 
-HZE_models = c("NEW1", "NEW2","4para","3para","2para","2paraTE")
+#Swift Light Ion 2 parameter quadratic
+func_sli_lin2 <- function(d, a, b){
+  return(BG_CA + a*d + b*d^2)
+}
 
+HZE_models = c("NEW1", "NEW2","4para","3para","2para","2paraTE")
+SLI_models = c("sli_lin1", "sli_lin2","sli_exp2", "sli_exp3")
 #================================ MODEL CALIBRATION ==================================#
 # nlsLM requires a starting value for the parameters to be calibrated. 
 
 #Calibration for NEW1 model
-result = calibration_HZE("NEW1", StartValues = list(kap0 = 600, sig0 = 5, eta0 = 0.05, eta1 = 0.01))
+result = calibration("NEW1", StartValues = list(kap0 = 600, sig0 = 5, eta0 = 0.05, eta1 = 0.01))
 parameters_NEW1 = result[[1]]
 sig_NEW1= result[[2]]
 model_NEW1 = result[[3]]
@@ -85,48 +91,60 @@ summary(model_NEW1, correlation = T)
 vcov(model_NEW1) #This is the same as sig_NEW1
 
 #Calibration for NEW2 model
-result = calibration_HZE("NEW2", StartValues = list(kap0 = 2000, sig0 = 5, eta0=.05))
+result = calibration("NEW2", StartValues = list(kap0 = 2000, sig0 = 5, eta0=.05))
 parameters_NEW2 = result[[1]]
 sig_NEW2 = result[[2]]
 model_NEW2 = result[[3]]
 
 #Calibration for 2-parameter model
-result = calibration_HZE("2para")
+result = calibration("2para")
 parameters_2para = result[[1]]
 sig_2para = result[[2]]
 model_2para = result[[3]]
 
 #Calibration for 3-parameter model
-result = calibration_HZE("3para")
+result = calibration("3para")
 parameters_3para = result[[1]]
 sig_3para = result[[2]]
 model_3para = result[[3]]
 
 #Calibration for 4-parameter model
-result = calibration_HZE("4para")
+result = calibration("4para")
 parameters_4para = result[[1]]
 sig_4para= result[[2]]
 model_4para = result[[3]]
 
 #Calibration for 2-parameter TE Only Model
-result = calibration_HZE("2paraTE")
+result = calibration("2paraTE")
 parameters_2paraTE = result[[1]]
 sig_2paraTE = result[[2]]
 model_2paraTE = result[[3]]
 
+#Calibration for 1-parameter Linear SLI Model
+result = calibration("sli_lin1", data = SwiftLight_data)
+parameters_sli_lin1 = result[[1]]
+sig_sli_lin1 = result[[2]]
+model_sli_lin1 = result[[3]]
 
-#Calibration for SLI Linear 1 parameter
-model_sli_lin1 <- lm(I(CA - BG_CA) ~ 0 + d, data = SwiftLight_data, weights = (1/(SwiftLight_data$error)^2))
-ccoef <- coef(model_sli_lin1)
-parameters_sli_lin1 <- data.frame(value = as.numeric(ccoef), model = "sli_lin1", parameter = "a")
-sig_sli_lin1 <- vcov(model_sli_lin1)
+#Calibration for 2-parameter Quadratic SLI Model
+result = calibration("sli_lin2", data = SwiftLight_data)
+parameters_sli_lin2 = result[[1]]
+sig_sli_lin2 = result[[2]]
+model_sli_lin2 = result[[3]]
 
-#Calibration for SLI Linear 2 parameter
-model_sli_lin2 <- lm(I(CA - BG_CA) ~ 0 + d + I(d^2), data = SwiftLight_data, weights = (1/(SwiftLight_data$error)^2))
-ccoef <- coef(model_sli_lin2)
-parameters_sli_lin2 <- data.frame(value = as.numeric(ccoef), model = "sli_lin2", parameter = names(ccoef))
-sig_sli_lin2 <- vcov(model_sli_lin2)
+#Calibration for 2-parameter Exponential SLI Model
+result = calibration("sli_exp2", data = SwiftLight_data, StartValues = list(a = 1, C = 1))
+parameters_sli_exp2 = result[[1]]
+sig_sli_exp2 = result[[2]]
+model_sli_exp2 = result[[3]]
+model_sli_exp2 %>% summary
 
+#Calibration for 3-parameter Quadratic SLI Model
+result = calibration("sli_exp3", data = SwiftLight_data, StartValues = list(a = 1, b = 1, C = 1))
+parameters_sli_exp3 = result[[1]]
+sig_sli_exp3 = result[[2]]
+model_sli_exp3 = result[[3]]
+model_sli_exp3 %>% summary
 
 Data_parameter = rbind(parameters_2para, 
                        parameters_3para, 
@@ -134,16 +152,22 @@ Data_parameter = rbind(parameters_2para,
                        parameters_2paraTE, 
                        parameters_NEW1,
                        parameters_NEW2,
-                       parameters_sli_lin1)
+                       parameters_sli_lin1,
+                       parameters_sli_lin2, 
+                       parameters_sli_exp2,
+                       parameters_sli_exp3)
 
 #================================ MODEL COMPARISON ==================================#
 
 sapply(HZE_models, AIC_function)
 sapply(HZE_models, BIC_function)
-sapply(HZE_models, CV_function) #Please look at CV results by_fold. Removing O350 makes nls not not converge, but the other ions work well.
+sapply(HZE_models, CV_function) 
+
+sapply(SLI_models, AIC_function, data = SwiftLight_data)
+sapply(SLI_models, BIC_function, data = SwiftLight_data)
+sapply(SLI_models, CV_function, data = SwiftLight_data) #Among the SLI models, the simple linear model has best scores in all three criteria
 CV_function("4para", by_fold = T)
 
-calibration_HZE("4para", data = HZE_data %>% filter(ion != "O350"))
 
 
 #=========== BASELINE NO-SYNERGY/ANTAGONISM MIXTURE DER FUNCTIONS =============#
