@@ -152,10 +152,7 @@ Data_parameter = rbind(parameters_2para,
                        parameters_2paraTE, 
                        parameters_NEW1,
                        parameters_NEW2,
-                       parameters_sli_lin1,
-                       parameters_sli_lin2, 
-                       parameters_sli_exp2,
-                       parameters_sli_exp3)
+                       parameters_sli_lin1)
 
 #================================ MODEL COMPARISON ==================================#
 
